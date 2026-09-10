@@ -1,0 +1,28 @@
+name: identity-federation-validation
+on: [push, pull_request]
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform -chdir=terraform fmt -check -recursive
+      - run: terraform -chdir=terraform init -backend=false
+      - run: terraform -chdir=terraform validate
+      - uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_dir: terraform
+  exchange-smoke-test:
+    if: ${{ github.event_name == 'push' && vars.ENABLE_FEDERATION_SMOKE_TEST == 'true' }}
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/exchange-token.sh > /dev/null
+        env:
+          AZURE_OIDC_TOKEN: ${{ secrets.AZURE_OIDC_TOKEN }}
+          GCP_WORKLOAD_PROVIDER: ${{ vars.GCP_WORKLOAD_PROVIDER }}
+          GCP_SERVICE_ACCOUNT_EMAIL: ${{ vars.GCP_SERVICE_ACCOUNT_EMAIL }}

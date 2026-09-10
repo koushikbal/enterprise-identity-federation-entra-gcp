@@ -1,0 +1,5 @@
+project_id = "replace-with-gcp-project"
+storage_bucket_name = "replace-with-existing-or-managed-bucket"
+entra_client_id = "00000000-0000-0000-0000-000000000000"
+entra_tenant_id = "00000000-0000-0000-0000-000000000000"
+entra_subject = "replace-with-stable-entra-subject"
